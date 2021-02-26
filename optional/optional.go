@@ -1,8 +1,8 @@
 package optional
 
-const (
-	NoModelFound    = "There is no such element."
-)
+import "errors"
+
+var ModelNotFound = errors.New("there is no model that has been found")
 
 // Optional is a simple struct that contains unexported Model
 // and boolean types that keep track of the optional.
@@ -45,13 +45,13 @@ func (o Optional) IsEmpty() bool {
 
 // Get is meant to return the Model value that is associated with the
 // optional. Use this if you can guarantee that the optional is not
-// empty. If the optional is empty, then a panic of NoModelFound will
-// be thrown.
-func (o Optional) Get() Model {
+// empty. If the optional is empty, then a an error ModelNotFound will
+// be returned alongside a nil model.
+func (o Optional) Get() (Model, error) {
 	if o.IsEmpty() {
-		panic(NoModelFound)
+		return nil, ModelNotFound
 	}
-	return o.model
+	return o.model, nil
 }
 
 // GetOrElse returns a different Model depending on whether or not the
