@@ -1,8 +1,7 @@
-package optionals
+package optional
 
 const (
 	NoModelFound    = "There is no such element."
-	NilNotPermitted = "Nil values are not permitted"
 )
 
 // Optional is a simple struct that contains unexported Model
@@ -22,21 +21,10 @@ type Optional struct {
 // OptionalOf simply takes in a Model and creates an Optional that
 // contains that model and the value associated with it.
 //
-// This function does not permit any nil values to be passed in or
-// else a panic of NilNotPermitted will be thrown. If a non-nil value
-// is not guaranteed, look into using OptionalOfNillable.
-func OptionalOf(m Model) Optional {
-	if m == nil {
-		panic(NilNotPermitted)
-	}
-	return Optional{model: m, empty: false}
-}
-
-// OptionalOfNillable is very similar to OptionalOf, however this
-// function can handle values that can possibly nil. In such a case
+// this function can handle values that can possibly nil. In such a case
 // an empty optional will be returned. If a non-nil value is passed,
 // then an optional with the value will be returned.
-func OptionalOfNillable(m Model) Optional {
+func OptionalOf(m Model) Optional {
 	if m == nil {
 		return OptionalEmpty()
 	}
@@ -67,7 +55,7 @@ func (o Optional) Get() Model {
 }
 
 // GetOrElse returns a different Model depending on whether or not the
-// optional contains a value or not. Empty optionals will return the passed
+// optional contains a value or not. Empty optional will return the passed
 // in model and non-empty optionals will return the value it contains.
 //
 // This can be useful in case where a default value should be used, in the
@@ -86,4 +74,13 @@ func (o Optional) IfPresent(f func(value Model))  {
 		return
 	}
 	f(o.model)
+}
+
+// IfNotPresent runs the passed in function in the case that the optional currently
+// is empty and does not contain any values.
+func (o Optional) IfNotPresent(f func()) {
+	if !o.IsEmpty() {
+		return
+	}
+	f()
 }

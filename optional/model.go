@@ -1,4 +1,4 @@
-package optionals
+package optional
 
 type Model interface {
 	Equals(Model) bool
