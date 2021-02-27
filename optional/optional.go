@@ -1,6 +1,9 @@
 package optional
 
-import "errors"
+import (
+	"errors"
+	. "github.com/Mathew-Estafanous/funGo/model"
+)
 
 var ModelNotFound = errors.New("there is no model that has been found")
 
@@ -60,7 +63,7 @@ func (o Optional) Get() (Model, error) {
 //
 // This can be useful in case where a default value should be used, in the
 // case that the given optional is currently empty.
-func (o Optional) GetOrElse(other Model)  Model {
+func (o Optional) GetOrElse(other Model) Model {
 	if o.IsEmpty() {
 		return other
 	}

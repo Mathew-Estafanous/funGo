@@ -1,11 +1,14 @@
 package optional
 
-import "testing"
+import (
+	"github.com/Mathew-Estafanous/funGo/model"
+	"testing"
+)
 
 // Simple Test model that implements the Model interface
 // to ensure there are minimal external dependencies.
 type FakeModel int
-func (t FakeModel) Equals(m Model) bool {
+func (t FakeModel) Equals(m model.Model) bool {
 	return t == m
 }
 
@@ -94,16 +97,15 @@ func TestOptional_IfPresent(t *testing.T) {
 	called := false
 	m := FakeModel(5)
 	opt := Optional{model: m, empty: false}
-	opt.IfPresent(func(value Model) {
+	opt.IfPresent(func(value model.Model) {
 		called = true
 	})
 	if !called {
 		t.Errorf("Optional didn't called func when optional wasn't empty.")
 	}
 
-	called = false
 	emptyOpt := Optional{model: nil, empty: true}
-	emptyOpt.IfPresent(func(value Model) {
+	emptyOpt.IfPresent(func(value model.Model) {
 		t.Errorf("Optional called function when it was empty.")
 	})
 }
