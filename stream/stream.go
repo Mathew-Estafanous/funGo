@@ -12,6 +12,8 @@ type Consumer func(m Model)
 
 type Predicate func(m Model) bool
 
+type Operator func(m Model) Model
+
 func NewStream(c chan Model) Stream {
 	return Stream{
 		ch: c,
@@ -46,12 +48,25 @@ func (s Stream) Filter(pred Predicate) Stream {
 	return NewStream(openChan)
 }
 
-func (s Stream) ForEach(fn Consumer)  {
+func (s Stream) Map(op Operator) Stream {
+	openChan := make(chan Model)
+
+	go func() {
+		defer close(openChan)
+		for model := range s.ch {
+			openChan <- op(model)
+		}
+	}()
+
+	return NewStream(openChan)
+}
+
+func (s Stream) ForEach(con Consumer)  {
 	if s.ch == nil {
 		return
 	}
 
 	for m := range s.ch {
-		fn(m)
+		con(m)
 	}
 }
