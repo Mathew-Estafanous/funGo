@@ -51,7 +51,7 @@ func TestModelSlice_Equals(t *testing.T) {
 	for _, te := range table {
 		model1, model2 := te.models[0], te.models[1]
 		if model1.Equals(model2) != te.want {
-			t.Errorf(te.name)
+			t.Error(te.name)
 		}
 	}
 }
