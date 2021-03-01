@@ -10,8 +10,6 @@ type Stream struct {
 
 type Consumer func(m Model)
 
-type Predicate func(m Model) bool
-
 type Operator func(m Model) Model
 
 func NewStream(c chan Model) Stream {
