@@ -21,8 +21,6 @@ type Stream struct {
 
 type Consumer func(m Model)
 
-type Operator func(m Model) Model
-
 // NewStream creates and returns a new stream struct that contains the
 // passed in channel.
 //
@@ -68,6 +66,8 @@ func (s Stream) Filter(pred Predicate) Stream {
 	return NewStream(nextChan)
 }
 
+// Map takes in an Operator and returns a Stream that contains the list of
+// models that the operator was used on.
 func (s Stream) Map(op Operator) Stream {
 	nextChan := make(chan Model)
 
@@ -75,6 +75,24 @@ func (s Stream) Map(op Operator) Stream {
 		defer close(nextChan)
 		for model := range s.ch {
 			nextChan <- op(model)
+		}
+	}()
+
+	return NewStream(nextChan)
+}
+
+// FlatMap applies and returns a Stream of models that have applied the
+// MultiOperator to each given model. This acts as a one to many
+// relationship operation that converts one Model into several models.
+func (s Stream) FlatMap(multiOp MultiOperator) Stream {
+	nextChan := make(chan Model)
+
+	go func() {
+		defer close(nextChan)
+		for model := range s.ch {
+			for _, m := range multiOp(model) {
+				nextChan <- m
+			}
 		}
 	}()
 
