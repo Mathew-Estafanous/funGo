@@ -99,6 +99,30 @@ func (s Stream) FlatMap(multiOp MultiOperator) Stream {
 	return NewStream(nextChan)
 }
 
+// Limit takes in a given maximum and limits the number of models that
+// are present within the stream and returns a stream that has a total
+// number of elements that does not exceed the maximum limit.
+//
+// If the limit is already greater than the initial stream, then that
+// stream will remain unchanged.
+func (s Stream) Limit(max int) Stream {
+	nextChan := make(chan Model)
+
+	go func() {
+		defer close(nextChan)
+		count := 0
+		for m := range s.ch {
+			if count >= max {
+				return
+			}
+			nextChan <- m
+			count++
+		}
+	}()
+
+	return NewStream(nextChan)
+}
+
 // ForEach is a terminating process that does return anything. For each
 // Model in the stream, the Consumer will be called on that model.
 func (s Stream) ForEach(con Consumer)  {
