@@ -5,6 +5,20 @@ import (
 	"testing"
 )
 
+
+func createStream(slice ModelSlice) Stream {
+	openChannel := make(chan Model)
+
+	go func() {
+		defer close(openChannel)
+		for _, m := range slice {
+			openChannel <- m
+		}
+	}()
+
+	return Stream{ openChannel }
+}
+
 func TestNewStream(t *testing.T) {
 	testValues := []ModelInt { 1,2,3,4,5 }
 	testChan := make(chan Model)
@@ -39,41 +53,41 @@ func TestNewStreamFromSlice(t *testing.T) {
 
 func TestStream_Filter(t *testing.T) {
 	type test struct {
-		name string
-		values ModelSlice
+		error     string
+		values    ModelSlice
 		predicate Predicate
-		want ModelSlice
+		want      ModelSlice
 	}
 
 	filterTest := test {
-		name: "Filter should properly apply predicate and filter out unwanted models based on predicate.",
-		values:  ModelSlice{ ModelInt(4), ModelInt(2), ModelInt(7), ModelInt(8) },
+		error:  "Filter should properly apply predicate and filter out unwanted models based on predicate.",
+		values: ModelSlice{ ModelInt(4), ModelInt(2), ModelInt(7), ModelInt(8) },
 		predicate: func(m Model) bool {
 			return m.(ModelInt) > 5
 		},
 		want: ModelSlice{ ModelInt(7), ModelInt(8) },
 	}
 
-	result := NewStreamFromSlice(filterTest.values).
+	result := createStream(filterTest.values).
 				Filter(filterTest.predicate)
 
 	for _, model := range filterTest.want {
 		if m:= <- result.ch; !m.Equals(model) {
-			t.Error(filterTest.name)
+			t.Error(filterTest.error)
 		}
 	}
 }
 
 func TestStream_Map(t *testing.T) {
 	type test struct {
-		name string
-		values ModelSlice
+		error    string
+		values   ModelSlice
 		operator Operator
-		want ModelSlice
+		want     ModelSlice
 	}
 
 	mapTest := test {
-		name: "Map should take given Model and turn it into a ModelByte.",
+		error:  "Map should take given Model and turn it into a ModelByte.",
 		values: ModelSlice{ ModelInt(5), ModelInt(8), ModelInt(3) },
 		operator: func(m Model) Model {
 			return ModelByte(m.(ModelInt))
@@ -81,13 +95,40 @@ func TestStream_Map(t *testing.T) {
 		want: ModelSlice{ ModelByte(5), ModelByte(8), ModelByte(3) },
 	}
 
-	result := NewStreamFromSlice(mapTest.values).
+	result := createStream(mapTest.values).
 				Map(mapTest.operator)
 
 	for _, model := range mapTest.want {
 		if m:= <- result.ch; !m.Equals(model) {
-			t.Error(mapTest.name)
+			t.Error(mapTest.error)
 		}
+	}
+}
+
+func TestStream_FlatMap(t *testing.T) {
+	type test struct {
+		error    string
+		values   ModelSlice
+		operator MultiOperator
+		result   ModelSlice
+	}
+
+	flatMapTest := test {
+		error: "Given a Stream the multi-operator should double each element and add it to next stream.",
+		values: ModelSlice{ ModelInt(3), ModelInt(4) },
+		operator: func(m Model) []Model {
+			return ModelSlice{ m, m}
+		},
+		result: ModelSlice{ ModelInt(3), ModelInt(3), ModelInt(4), ModelInt(4) },
+	}
+
+	result := createStream(flatMapTest.values).FlatMap(flatMapTest.operator)
+	index := 0
+	for m := range result.ch {
+		if !flatMapTest.result[index].Equals(m) {
+			t.Error(flatMapTest.error)
+		}
+		index++
 	}
 }
 
@@ -115,7 +156,7 @@ func TestStream_Limit(t *testing.T) {
 	}
 
 	for _, te := range limitTest {
-		result := NewStreamFromSlice(te.values).Limit(te.limit)
+		result := createStream(te.values).Limit(te.limit)
 		count := 0
 		for m := range result.ch {
 			if !m.Equals(te.want[count]) {
@@ -127,5 +168,62 @@ func TestStream_Limit(t *testing.T) {
 		if count != len(te.want) {
 			t.Error(te.name)
 		}
+	}
+}
+
+func TestStream_Distinct(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		want ModelSlice
+	}
+
+	distinctTests := []test {
+		{
+			error: "Duplicates in model slice should be removed from stream and only 1 of each element be found.",
+			value: ModelSlice{ ModelInt(1), ModelInt(1), ModelInt(2) },
+			want: ModelSlice{ ModelInt(1), ModelInt(2) },
+		},
+		{
+			error: "Stream with no duplicate elements should not be altered.",
+			value: ModelSlice{ ModelInt(1), ModelInt(2) },
+			want: ModelSlice{ ModelInt(1), ModelInt(2) },
+		},
+	}
+
+	for _, te := range distinctTests {
+		result := createStream(te.value).Distinct()
+		index := 0
+		for m := range result.ch {
+			if !m.Equals(te.want[index]) {
+				t.Error(te.error)
+			}
+			index++
+		}
+	}
+}
+
+func TestStream_ForEach(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		consumer Consumer
+		want int
+	}
+
+	count := 0
+	forEachTest := test{
+		error: "Stream with three models should have the consumer called on all three.",
+		value: ModelSlice{ ModelInt(1), ModelInt(2), ModelInt(3) },
+		consumer: func(m Model) {
+			count++
+		},
+		want: 3,
+	}
+
+	createStream(forEachTest.value).ForEach(forEachTest.consumer)
+
+	if count != forEachTest.want {
+		t.Error(forEachTest.error)
 	}
 }

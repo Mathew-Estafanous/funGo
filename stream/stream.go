@@ -123,6 +123,27 @@ func (s Stream) Limit(max int) Stream {
 	return NewStream(nextChan)
 }
 
+func (s Stream) Distinct() Stream {
+	var modelList ModelSlice
+	for m := range s.ch {
+		if contains(modelList, m) {
+			continue
+		}
+		modelList = append(modelList, m)
+	}
+
+	nextChan := make(chan Model)
+
+	go func() {
+		defer close(nextChan)
+		for _, v := range modelList {
+			nextChan <- v
+		}
+	}()
+
+	return NewStream(nextChan)
+}
+
 // ForEach is a terminating process that does return anything. For each
 // Model in the stream, the Consumer will be called on that model.
 func (s Stream) ForEach(con Consumer)  {
@@ -133,4 +154,13 @@ func (s Stream) ForEach(con Consumer)  {
 	for m := range s.ch {
 		con(m)
 	}
+}
+
+func contains(s []Model, m Model) bool {
+	for _, v := range s {
+		if v.Equals(m) {
+			return true
+		}
+	}
+	return false
 }
