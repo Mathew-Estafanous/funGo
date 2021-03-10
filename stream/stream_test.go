@@ -203,6 +203,143 @@ func TestStream_Distinct(t *testing.T) {
 	}
 }
 
+func TestStream_Peek(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		consumer Consumer
+		want int
+	}
+
+	count := 0
+	peekTest := test{
+		error: "Given a stream, the passed in consumer should be called on each element.",
+		value: ModelSlice{ ModelInt(1), ModelInt(2) },
+		consumer: func(m Model) {
+			count++
+		},
+		want: 2,
+	}
+
+	result := createStream(peekTest.value).Peek(peekTest.consumer)
+
+	if count != peekTest.want {
+		t.Error(peekTest.error)
+	}
+	index := 0
+	for m :=  range result.ch {
+		if !m.Equals(peekTest.value[index]) {
+			t.Error(peekTest.error)
+		}
+		index++
+	}
+}
+
+func TestStream_AnyMatch(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		predicate Predicate
+		want bool
+	}
+
+	anyMatchTests := []test {
+		{
+			error: "Given a stream with a model that matches, the result should be true.",
+			value: ModelSlice{ ModelInt(1), ModelInt(2) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(1))
+			},
+			want: true,
+		},
+		{
+			error: "Given a stream with no model that matches, the result should be false.",
+			value: ModelSlice{ ModelInt(1), ModelInt(2) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(3))
+			},
+			want: false,
+		},
+	}
+
+	for _, v := range anyMatchTests {
+		result := createStream(v.value).AnyMatch(v.predicate)
+		if result != v.want {
+			t.Error(v.error)
+		}
+	}
+}
+
+func TestStream_AllMatch(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		predicate Predicate
+		want bool
+	}
+
+	allMatchTests := []test {
+		{
+			error: "Given a stream in which all models match the predicate, should return true",
+			value: ModelSlice{ ModelInt(1), ModelInt(1) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(1))
+			},
+			want: true,
+		},
+		{
+			error: "Given a stream where not all models match predicate, should return false.",
+			value: ModelSlice{ ModelInt(1), ModelInt(2) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(1))
+			},
+			want: false,
+		},
+	}
+
+	for _, v := range allMatchTests {
+		result := createStream(v.value).AllMatch(v.predicate)
+		if result != v.want {
+			t.Error(v.error)
+		}
+	}
+}
+
+func TestStream_NoneMatch(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		predicate Predicate
+		want bool
+	}
+
+	noneMatchTests := []test {
+		{
+			error: "Given a stream in which all models don't match the predicate, should return true",
+			value: ModelSlice{ ModelInt(1), ModelInt(1) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(2))
+			},
+			want: true,
+		},
+		{
+			error: "Given a stream where a model matches the predicate, should return false.",
+			value: ModelSlice{ ModelInt(1), ModelInt(2) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(1))
+			},
+			want: false,
+		},
+	}
+
+	for _, v := range noneMatchTests {
+		result := createStream(v.value).NoneMatch(v.predicate)
+		if result != v.want {
+			t.Error(v.error)
+		}
+	}
+}
+
 func TestStream_ForEach(t *testing.T) {
 	type test struct {
 		error string

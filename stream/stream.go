@@ -10,8 +10,6 @@ import (
 // there are three main steps that are involved. Creation, Non-Terminal
 // and Termination steps.
 //
-// Creation
-//
 // First is the Creation, which involves generating a Stream usually
 // using a given ModelSlice or by providing a channel. If you provide a channel,
 // you are responsible for closing it when finished.
@@ -123,6 +121,9 @@ func (s Stream) Limit(max int) Stream {
 	return NewStream(nextChan)
 }
 
+// Distinct alters the given stream by removing all duplicate elements
+// and ensuring that the stream does not contain any equal values.
+// If there are no duplicates, then the stream should remain unaltered.
 func (s Stream) Distinct() Stream {
 	var modelList ModelSlice
 	for m := range s.ch {
@@ -136,31 +137,96 @@ func (s Stream) Distinct() Stream {
 
 	go func() {
 		defer close(nextChan)
-		for _, v := range modelList {
-			nextChan <- v
+		for _, k := range modelList {
+			nextChan <- k
 		}
 	}()
 
 	return NewStream(nextChan)
 }
 
-// ForEach is a terminating process that does return anything. For each
-// Model in the stream, the Consumer will be called on that model.
-func (s Stream) ForEach(con Consumer)  {
-	if s.ch == nil {
-		return
-	}
-
-	for m := range s.ch {
-		con(m)
-	}
-}
-
-func contains(s []Model, m Model) bool {
-	for _, v := range s {
+// contains is an unexported method that Distinct() when checking
+// that there are no duplicates in the given ModelSlice.
+func contains(slice ModelSlice, m Model) bool {
+	for _, v := range slice {
 		if v.Equals(m) {
 			return true
 		}
 	}
 	return false
+}
+
+// Peek is an operation that uses a consumer to peek into the given
+// stream and observe the Models within. It is not meant to alter
+// any of the elements or act as a terminal operation.
+//
+// The ForEach function is similar, but is meant as a terminal operation,
+// unlike this.
+func (s Stream) Peek(consumer Consumer) Stream {
+	var modelList ModelSlice
+	for m := range s.ch {
+		consumer(m)
+		modelList = append(modelList, m)
+	}
+
+	nexChan := make(chan Model)
+
+	go func() {
+		defer close(nexChan)
+		for _, v := range modelList {
+			nexChan <- v
+		}
+	}()
+
+	return NewStream(nexChan)
+}
+
+
+// AnyMatch is a terminating process that uses a given predicate to
+// check if the predicate is true on any of the models. If it matches
+// with any of the models, then the entire process will return true.
+func (s Stream) AnyMatch(predicate Predicate) bool {
+	for m := range s.ch {
+		if predicate(m) {
+			return true
+		}
+	}
+	return false
+}
+
+// AllMatch is a termination process and requires that all the models
+// within the stream match the predicate or else the function will
+// end up returning false. If all models match the predicate then the
+// return bool will be true.
+func (s Stream) AllMatch(predicate Predicate) bool {
+	for m := range s.ch {
+		if !predicate(m) {
+			return false
+		}
+	}
+	return true
+}
+
+// NoneMatch is a terminating process that is the reciprocal
+// result to AllMatch. Returning true if all the models do not match
+// the predicate and false if any of the models match the predicate.
+func (s Stream) NoneMatch(predicate Predicate) bool {
+	for m := range s.ch {
+		if predicate(m) {
+			return false
+		}
+	}
+	return true
+}
+
+// ForEach is a terminating process that does return anything. For each
+// Model in the stream, the Consumer will be called on that model.
+func (s Stream) ForEach(consumer Consumer)  {
+	if s.ch == nil {
+		return
+	}
+
+	for m := range s.ch {
+		consumer(m)
+	}
 }
