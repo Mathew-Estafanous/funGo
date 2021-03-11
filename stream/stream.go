@@ -2,6 +2,7 @@ package stream
 
 import (
 	. "github.com/Mathew-Estafanous/funGo/model"
+	. "github.com/Mathew-Estafanous/funGo/optional"
 )
 
 // Stream is a struct that acts as a wrapper around channels and uses
@@ -217,6 +218,26 @@ func (s Stream) NoneMatch(predicate Predicate) bool {
 		}
 	}
 	return true
+}
+
+func (s Stream) FindFirst(predicate Predicate) Optional {
+	for m := range s.ch {
+		if predicate(m) {
+			return OptionalOf(m)
+		}
+	}
+	return OptionalEmpty()
+}
+
+// Count takes in the Stream and gets the total number of models that
+// are remaining in the given Stream. This is a terminal operation and
+// will return the count as an int.
+func (s Stream) Count() int {
+	count := 0
+	for range s.ch {
+		count++
+	}
+	return count
 }
 
 // ForEach is a terminating process that does return anything. For each

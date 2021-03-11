@@ -340,6 +340,67 @@ func TestStream_NoneMatch(t *testing.T) {
 	}
 }
 
+func TestStream_FindFirst(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		predicate Predicate
+		want Model
+	}
+
+	findFirstTests := []test {
+		{
+			error: "Given a stream that has a model that matches, should return that model.",
+			value: ModelSlice{ ModelInt(1), ModelInt(3) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(3))
+			},
+			want: ModelInt(3),
+		},
+		{
+			error: "Given a stream that has no matching models, should not find a model and will return nil.",
+			value: ModelSlice{ ModelInt(1), ModelInt(3) },
+			predicate: func(m Model) bool {
+				return m.Equals(ModelInt(2))
+			},
+			want: nil,
+		},
+	}
+
+	for _, v := range findFirstTests {
+		result := createStream(v.value).FindFirst(v.predicate)
+		m, _ := result.Get()
+		if v.want == nil && m != nil{
+			t.Error(v.error)
+			continue
+		}
+		if v.want != nil {
+			if !v.want.Equals(m) {
+				t.Error(v.error)
+			}
+		}
+	}
+}
+
+func TestStream_Count(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		want int
+	}
+
+	countTest := test{
+		error: "Given a stream with 2 models, the count should return 2.",
+		value: ModelSlice{ ModelInt(1), ModelInt(2) },
+		want: 2,
+	}
+
+	result := createStream(countTest.value).Count()
+	if result != countTest.want {
+		t.Error(countTest.error)
+	}
+}
+
 func TestStream_ForEach(t *testing.T) {
 	type test struct {
 		error string
