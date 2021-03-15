@@ -27,7 +27,7 @@ func ToSlice() Collector {
 		return append(supp.(ModelSlice), model)
 	}
 
-	finisher := BasicFinisher
+	finisher := basicFinisher
 
 	return NewCollector(supplier, accumulator, finisher)
 }
@@ -49,7 +49,7 @@ func GroupingBy(classifier Operator, downstream Collector) Collector {
 
 	finisher := func(m Model) Model {
 		if downstream.finisher == nil {
-			return BasicFinisher(m)
+			return basicFinisher(m)
 		}
 
 		s := supplier()
@@ -62,6 +62,6 @@ func GroupingBy(classifier Operator, downstream Collector) Collector {
 	return NewCollector(supplier, accumulator, finisher)
 }
 
-func BasicFinisher(m Model) Model {
+func basicFinisher(m Model) Model {
 	return m
 }

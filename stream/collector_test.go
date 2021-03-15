@@ -83,11 +83,6 @@ func TestGroupingBy(t *testing.T) {
 	if !accumulatorResult.Equals(expectedMap) {
 		t.Error("GroupingBy accumulator did not properly create the correct ModelMap")
 	}
-}
 
-func TestBasicFinisher(t *testing.T) {
-	result := BasicFinisher(ModelInt(1))
-	if !result.Equals(ModelInt(1)) {
-		t.Error("Basic Finisher is not simply return exact same model as expected.")
-	}
+	//TODO: Make sure to write the test for the finisher here.
 }
