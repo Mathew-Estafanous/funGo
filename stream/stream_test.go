@@ -401,6 +401,31 @@ func TestStream_Count(t *testing.T) {
 	}
 }
 
+func TestStream_Collect(t *testing.T) {
+	type test struct {
+		error string
+		value ModelSlice
+		collector Collector
+		want ModelSlice
+	}
+
+	collectTest := test{
+		error: "When Collect is given a ToSlice collector it should transform the elements in the stream into a Slice.",
+		value: ModelSlice{ ModelInt(1), ModelInt(3), ModelInt(4) },
+		collector: Collector{
+			supplier: func() Model { return ModelSlice{} },
+			accumulator: func(m1, m2 Model) Model { return append(m1.(ModelSlice), m2) },
+			finisher: func(m Model) Model { return m },
+		},
+		want: ModelSlice{ ModelInt(1), ModelInt(3), ModelInt(4) },
+	}
+
+	result := createStream(collectTest.value).Collect(collectTest.collector)
+	if !result.(ModelSlice).Equals(collectTest.want) {
+		t.Error(collectTest.error)
+	}
+}
+
 func TestStream_ForEach(t *testing.T) {
 	type test struct {
 		error string

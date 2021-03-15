@@ -240,6 +240,22 @@ func (s Stream) Count() int {
 	return count
 }
 
+// Collect is an important terminal operator that allows flexibility in
+// in outlining how the stream should be grouped and collected. Note that
+// the method returns 'interface{}' which allows for any type beyond just
+// Models.
+func (s Stream) Collect(collector Collector) interface{} {
+	result := collector.supplier()
+
+	for m := range  s.ch {
+		result = collector.accumulator(result, m)
+	}
+
+	result = collector.finisher(result)
+
+	return result
+}
+
 // ForEach is a terminating process that does return anything. For each
 // Model in the stream, the Consumer will be called on that model.
 func (s Stream) ForEach(consumer Consumer)  {

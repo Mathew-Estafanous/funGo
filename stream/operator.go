@@ -10,6 +10,10 @@ import . "github.com/Mathew-Estafanous/funGo/model"
 // function that applies the given operator to every Model in the stream
 type Operator func(m Model) Model
 
+// BiOperator is similar to the regular Operator, except it takes in
+// two models while returning only one model.
+type BiOperator func(m1, m2 Model) Model
+
 // MultiOperator is very similar to the Operator in what it does and
 // its main use. The key difference is that the operator requires that it
 // returns an array of models from the given model.
