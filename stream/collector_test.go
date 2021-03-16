@@ -84,5 +84,35 @@ func TestGroupingBy(t *testing.T) {
 		t.Error("GroupingBy accumulator did not properly create the correct ModelMap")
 	}
 
-	//TODO: Make sure to write the test for the finisher here.
+	finisherResults := groupCollector.finisher(accumulatorResult)
+	if !finisherResults.Equals(expectedMap) {
+		t.Error("GroupingBy finisher did not properly finalize the type.")
+	}
+}
+
+
+func TestToMapSpecify(t *testing.T) {
+	basicOp := func(m Model) Model { return m }
+	mapCollector := ToMapSpecify(basicOp, basicOp)
+
+	supplierResult := mapCollector.supplier()
+	if !supplierResult.Equals(ModelMap{}) {
+		t.Error("ToMapSpecify expects that the supplier returns a ModelMap type.")
+	}
+
+	accumulatorResult := ModelMap{}
+	accumulatorResult = mapCollector.accumulator(accumulatorResult, ModelInt(0)).(ModelMap)
+
+	expectedMap := ModelMap{
+		ModelInt(0): ModelInt(0),
+	}
+
+	if !accumulatorResult.Equals(expectedMap) {
+		t.Error("ToMapSpecify accumulator did not properly accumulate the given results.")
+	}
+
+	finisherResults := mapCollector.finisher(accumulatorResult)
+	if !finisherResults.Equals(expectedMap) {
+		t.Error("ToMapSpecify finished did not properly finalize the type.")
+	}
 }
