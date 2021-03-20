@@ -18,4 +18,3 @@ func (ms ModelSlice) Equals(m Model) bool {
 	}
 	return true
 }
-

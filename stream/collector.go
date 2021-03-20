@@ -18,9 +18,9 @@ type Supplier func() Model
 // the resulting elements within the stream into an outlined format. This means
 // collecting into Slices, Maps, or any other structure for that matter.
 type Collector struct {
-	supplier Supplier
+	supplier    Supplier
 	accumulator BiOperator
-	finisher Operator
+	finisher    Operator
 }
 
 // NewCollector is used to create a new Collector struct with the given supplier,

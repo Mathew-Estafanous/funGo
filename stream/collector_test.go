@@ -24,7 +24,7 @@ func TestNewCollector(t *testing.T) {
 	}
 
 	collectorAccumulator := collector.accumulator(ModelSlice{}, ModelInt(1))
-	if !collectorAccumulator.Equals(ModelSlice{ ModelInt(1) }) {
+	if !collectorAccumulator.Equals(ModelSlice{ModelInt(1)}) {
 		t.Error("NewCollector did not use the accumulator that was passed in.")
 	}
 
@@ -43,7 +43,7 @@ func TestToSlice(t *testing.T) {
 	}
 
 	accumulatorResult := collector.accumulator(ModelSlice{}, ModelInt(1))
-	if !accumulatorResult.Equals(ModelSlice{ ModelInt(1) }) {
+	if !accumulatorResult.Equals(ModelSlice{ModelInt(1)}) {
 		t.Error("ToSlice accumulator should properly append Model into the given slice.")
 	}
 
@@ -55,15 +55,14 @@ func TestToSlice(t *testing.T) {
 
 func TestGroupingBy(t *testing.T) {
 	mockCollector := Collector{
-		supplier: func() Model { return ModelSlice{} },
+		supplier:    func() Model { return ModelSlice{} },
 		accumulator: func(m1, m2 Model) Model { return append(m1.(ModelSlice), m2) },
-		finisher: func(m Model) Model { return m },
+		finisher:    func(m Model) Model { return m },
 	}
 
-
 	groupCollector := GroupingBy(func(m Model) Model {
-									return m.(ModelInt)
-								}, mockCollector)
+		return m.(ModelInt)
+	}, mockCollector)
 
 	supplierResult := groupCollector.supplier()
 	if !supplierResult.Equals(ModelMap{}) {
@@ -76,8 +75,8 @@ func TestGroupingBy(t *testing.T) {
 	}
 
 	expectedMap := ModelMap{
-		ModelInt(0): ModelSlice{ ModelInt(0) },
-		ModelInt(1): ModelSlice{ ModelInt(1) },
+		ModelInt(0): ModelSlice{ModelInt(0)},
+		ModelInt(1): ModelSlice{ModelInt(1)},
 	}
 
 	if !accumulatorResult.Equals(expectedMap) {
@@ -90,9 +89,8 @@ func TestGroupingBy(t *testing.T) {
 	}
 }
 
-
 func TestToMapSpecify(t *testing.T) {
-	basicOp := func(m Model) Model { return m }
+	basicOp := func(m Model) Model { return m.(ModelInt) + 1 }
 	mapCollector := ToMapSpecify(basicOp, basicOp)
 
 	supplierResult := mapCollector.supplier()
@@ -104,7 +102,7 @@ func TestToMapSpecify(t *testing.T) {
 	accumulatorResult = mapCollector.accumulator(accumulatorResult, ModelInt(0)).(ModelMap)
 
 	expectedMap := ModelMap{
-		ModelInt(0): ModelInt(0),
+		ModelInt(1): ModelInt(1),
 	}
 
 	if !accumulatorResult.Equals(expectedMap) {
@@ -114,5 +112,29 @@ func TestToMapSpecify(t *testing.T) {
 	finisherResults := mapCollector.finisher(accumulatorResult)
 	if !finisherResults.Equals(expectedMap) {
 		t.Error("ToMapSpecify finished did not properly finalize the type.")
+	}
+}
+
+func TestToMap(t *testing.T) {
+	mapCollector := ToMap()
+
+	supplierResult := mapCollector.supplier()
+	if !supplierResult.Equals(ModelMap{}) {
+		t.Error("ToMap expects that the supplier returns a ModelMap type.")
+	}
+
+	expectedMap := ModelMap{
+		ModelInt(0): ModelInt(0),
+	}
+
+	accumulatorResult := ModelMap{}
+	accumulatorResult = mapCollector.accumulator(accumulatorResult, ModelInt(0)).(ModelMap)
+	if !accumulatorResult.Equals(expectedMap) {
+		t.Error("ToMap accumulator did not used the basic function when accumulating.")
+	}
+
+	finisherResults := mapCollector.finisher(accumulatorResult)
+	if !finisherResults.Equals(expectedMap) {
+		t.Error("ToMap finished did not properly finalize the type.")
 	}
 }

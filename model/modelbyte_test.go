@@ -4,12 +4,12 @@ import "testing"
 
 func TestModelByte_Equals(t *testing.T) {
 	type test struct {
-		name string
+		name   string
 		models [2]ModelByte
-		want bool
+		want   bool
 	}
 
-	table := []test {
+	table := []test{
 		{
 			name: "Both bytes are equal and should return true.",
 			models: [2]ModelByte{

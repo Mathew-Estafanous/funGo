@@ -182,7 +182,6 @@ func (s Stream) Peek(consumer Consumer) Stream {
 	return NewStream(nexChan)
 }
 
-
 // AnyMatch is a terminating process that uses a given predicate to
 // check if the predicate is true on any of the models. If it matches
 // with any of the models, then the entire process will return true.
@@ -247,7 +246,7 @@ func (s Stream) Count() int {
 func (s Stream) Collect(collector Collector) interface{} {
 	result := collector.supplier()
 
-	for m := range  s.ch {
+	for m := range s.ch {
 		result = collector.accumulator(result, m)
 	}
 
@@ -258,7 +257,7 @@ func (s Stream) Collect(collector Collector) interface{} {
 
 // ForEach is a terminating process that does return anything. For each
 // Model in the stream, the Consumer will be called on that model.
-func (s Stream) ForEach(consumer Consumer)  {
+func (s Stream) ForEach(consumer Consumer) {
 	if s.ch == nil {
 		return
 	}

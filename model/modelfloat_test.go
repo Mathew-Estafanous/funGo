@@ -4,12 +4,12 @@ import "testing"
 
 func TestModelFloat_Equals(t *testing.T) {
 	type test struct {
-		name string
+		name   string
 		models [2]ModelFloat
-		want bool
+		want   bool
 	}
 
-	table := []test {
+	table := []test{
 		{
 			name: "Check if two values that are equal return true",
 			models: [2]ModelFloat{

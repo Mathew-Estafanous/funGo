@@ -6,12 +6,12 @@ import (
 
 func TestModelMap_Equals(t *testing.T) {
 	type test struct {
-		name string
+		name   string
 		models [2]ModelMap
-		want bool
+		want   bool
 	}
 
-	table := []test {
+	table := []test{
 		{
 			name: "Both ModelMaps are equal and should return true.",
 			models: [2]ModelMap{

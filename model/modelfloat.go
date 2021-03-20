@@ -7,4 +7,3 @@ type ModelFloat float32
 func (mf ModelFloat) Equals(m Model) bool {
 	return mf == m
 }
-

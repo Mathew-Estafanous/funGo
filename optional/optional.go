@@ -72,7 +72,7 @@ func (o Optional) GetOrElse(other Model) Model {
 
 // IfPresent runs the passed in function on the Model when the optional does
 // contain a value. If the value is not present, then the function will not run.
-func (o Optional) IfPresent(f func(value Model))  {
+func (o Optional) IfPresent(f func(value Model)) {
 	if o.IsEmpty() {
 		return
 	}

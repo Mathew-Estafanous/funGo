@@ -12,12 +12,12 @@ func TestPredicate_And(t *testing.T) {
 		want bool
 	}
 
-	andTests := []test {
+	andTests := []test{
 		{
 			name: "Both predicates return true, which means true is expected.",
 			pred: [2]Predicate{
 				func(m Model) bool {
-					return  true
+					return true
 				},
 				func(m Model) bool {
 					return true
@@ -66,7 +66,7 @@ func TestPredicate_Not(t *testing.T) {
 		want bool
 	}
 
-	notTests := []test {
+	notTests := []test{
 		{
 			name: "Given predicate returns false, which means true is expected.",
 			pred: func(m Model) bool {
@@ -98,12 +98,12 @@ func TestPredicate_Or(t *testing.T) {
 		want bool
 	}
 
-	orTests := []test {
+	orTests := []test{
 		{
 			name: "Both predicates return true, which means true is expected.",
 			pred: [2]Predicate{
 				func(m Model) bool {
-					return  true
+					return true
 				},
 				func(m Model) bool {
 					return true

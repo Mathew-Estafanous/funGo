@@ -7,4 +7,3 @@ type ModelByte byte
 func (mb ModelByte) Equals(m Model) bool {
 	return mb == m
 }
-

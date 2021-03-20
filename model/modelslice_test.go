@@ -4,12 +4,12 @@ import "testing"
 
 func TestModelSlice_Equals(t *testing.T) {
 	type test struct {
-		name string
+		name   string
 		models [2]ModelSlice
-		want bool
+		want   bool
 	}
 
-	table := []test {
+	table := []test{
 		{
 			name: "Both slices are same length and same values, should return true.",
 			models: [2]ModelSlice{

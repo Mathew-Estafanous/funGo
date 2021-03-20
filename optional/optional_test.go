@@ -8,6 +8,7 @@ import (
 // Simple Test model that implements the Model interface
 // to ensure there are minimal external dependencies.
 type FakeModel int
+
 func (t FakeModel) Equals(m model.Model) bool {
 	return t == m
 }
