@@ -24,8 +24,8 @@ when you are planning iterate over a slice of data and apply a variety of operat
 
 When using streams, there are 3 main stages that must be present:
 - [Creation](#Creation) - Only ONE
-- [Non-Terminal Operation](#Non Terminal Operation) - Unlimited
-- [Terminal Operation](#Terminal Operation) - Only ONE
+- [Non-Terminal Operation](#Non-Terminal-Operation) - Unlimited
+- [Terminal Operation](#Terminal-Operation) - Only ONE
 
 ### Creation
 All streams start with the creation step. Note that a `Stream` requires that all types have
@@ -43,7 +43,7 @@ There are several basic Model types that are provided:
 - ModelMap
 - ModelSlice
 
-### Non Terminal Operation
+### Non-Terminal Operation
 This stage is where the bulk of the operation will occur. There is a wide variety of operations
 such as `Filter` and `Map`. You can find a full list of them all in the [godoc.](https://pkg.go.dev/github.com/Mathew-Estafanous/funGo/stream#Stream)
 These operations are best used as a series of chain operations that are combined to come to a
