@@ -62,9 +62,56 @@ datatype that you chose.
 ---
 ## Examples
 
-Creation & Non-Terminal Operation example
+Example #1:
+Employees with salaries greater than 50-thousand will be filtered out.
 ```go
-// COMING SOON
+// ModelSlice of 3 Employees{name salary}
+// [{ Alex 45500 }, {Rebecca 80000}, {Josh 39000}]
+allEmployees := getAllEmployees()
+
+// Result will filter out all employees with a salary greater than 50K
+result := NewStreamFromSlice(allEmployees).
+        Filter(func(m Model) bool {
+            return m.(Employee).salary <= 50000
+        }).
+        Collect(ToSlice())
+// result = [{ Alex 45500 }, {Josh 39000}]
+```
+
+Example #2: Give all Developers a 50% raise and then filter out all employees
+who have a salary that exceeds 100-thousand. Only employees with less than that
+should remain.
+```go
+// ModelSlice of 3 Employees{name title salary}
+// [{Alex Developer 45500}, 
+//  {Rebecca Manager 80000}, 
+//  {Josh Developer 39000}]
+allEmployees := getAllEmployees()
+
+result := NewStreamFromSlice(allEmployees).
+        Map(func(m Model) Model {
+            if m.(Employee).title != "Developer" {
+                return m
+            }
+            developer := m.(Employee)
+            developer.salary *= 1.5
+            return developer
+        }).
+        Filter(func(m Model) bool {
+            return m.(Employee).salary <= 100000
+        }).
+        Collect(ToSlice())
+
+// result = [{Rebecca Manager 84000} {Joshua Developer 97500}]
+```
+
+**NOTE:** It is recommended that you import in the following format, so
+that everything is much more clear when using the package.
+```go
+import (
+    . "github.com/Mathew-Estafanous/funGo/model"
+    . "github.com/Mathew-Estafanous/funGo/stream"
+)
 ```
 
 ---
