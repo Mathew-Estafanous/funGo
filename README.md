@@ -1,6 +1,5 @@
 # FunGo
-[![Go Report Card](https://goreportcard.com/badge/github.com/Mathew-Estafanous/funGo)](https://goreportcard.com/report/github.com/Mathew-Estafanous/funGo)
-![](http://godoc.org/github.com/Mathew-Estafanous/funGo?status.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Mathew-Estafanous/funGo)](https://goreportcard.com/report/github.com/Mathew-Estafanous/funGo) [![](http://godoc.org/github.com/Mathew-Estafanous/funGo?status.svg)](https://pkg.go.dev/github.com/Mathew-Estafanous/funGo)
 ----
 ### What is This?
 FunGo is an easy-to-use functional programming package that brings a simple
