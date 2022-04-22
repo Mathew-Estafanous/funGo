@@ -1,25 +1,16 @@
 package optional
 
 import (
-	"github.com/Mathew-Estafanous/funGo/model"
 	"testing"
 )
 
-// Simple Test model that implements the Model interface
-// to ensure there are minimal external dependencies.
-type FakeModel int
-
-func (t FakeModel) Equals(m model.Model) bool {
-	return t == m
-}
-
 func TestOptionalOf(t *testing.T) {
-	m := FakeModel(5)
+	m := 5
 	opt := OptionalOf(m)
 	if opt.empty {
 		t.Errorf("Created optional returned empty as false instead of true.")
 	}
-	if !opt.model.Equals(m) {
+	if opt.model != m {
 		t.Errorf("Created optoinal value is %v instead of %v", opt.model, m)
 	}
 
@@ -44,10 +35,10 @@ func TestOptionalEmpty(t *testing.T) {
 }
 
 func TestOptional_Get(t *testing.T) {
-	m := FakeModel(5)
-	opt := Optional{model: m, empty: false}
+	m := 5
+	opt := Optional[int]{model: m, empty: false}
 
-	if result, _ := opt.Get(); !result.Equals(m) {
+	if result, _ := opt.Get(); result != m {
 		t.Errorf("Received result value exected %v but received %v", m, result)
 	}
 
@@ -65,21 +56,21 @@ func TestOptional_IsEmpty(t *testing.T) {
 }
 
 func TestOptional_GetOrElse(t *testing.T) {
-	m := FakeModel(5)
-	opt := Optional{model: m, empty: false}
-	if result := opt.GetOrElse(nil); !result.Equals(m) {
+	m := 5
+	opt := Optional[int]{model: m, empty: false}
+	if result := opt.GetOrElse(2); result != m {
 		t.Errorf("Received %v instead of %v as the Get model.", result, m)
 	}
 
-	emptyOpt := Optional{model: nil, empty: true}
-	if result := emptyOpt.GetOrElse(m); !result.Equals(m) {
+	emptyOpt := Optional[int]{model: 0, empty: true}
+	if result := emptyOpt.GetOrElse(m); result != m {
 		t.Errorf("Received %v instead of %v as the OrElse model.", result, m)
 	}
 }
 
 func TestOptional_IfNotPresent(t *testing.T) {
-	m := FakeModel(5)
-	opt := Optional{model: m, empty: false}
+	m := 5
+	opt := Optional[int]{model: m, empty: false}
 	opt.IfNotPresent(func() {
 		t.Errorf("Optional called func when optional was not-empty.")
 	})
@@ -96,17 +87,17 @@ func TestOptional_IfNotPresent(t *testing.T) {
 
 func TestOptional_IfPresent(t *testing.T) {
 	called := false
-	m := FakeModel(5)
-	opt := Optional{model: m, empty: false}
-	opt.IfPresent(func(value model.Model) {
+	m := 5
+	opt := Optional[int]{model: m, empty: false}
+	opt.IfPresent(func(m int) {
 		called = true
 	})
 	if !called {
 		t.Errorf("Optional didn't called func when optional wasn't empty.")
 	}
 
-	emptyOpt := Optional{model: nil, empty: true}
-	emptyOpt.IfPresent(func(value model.Model) {
+	emptyOpt := Optional[int]{model: 0, empty: true}
+	emptyOpt.IfPresent(func(value int) {
 		t.Errorf("Optional called function when it was empty.")
 	})
 }
