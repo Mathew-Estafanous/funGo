@@ -2,7 +2,6 @@ package optional
 
 import (
 	"errors"
-	. "github.com/Mathew-Estafanous/funGo/model"
 )
 
 var ModelNotFound = errors.New("there is no model that has been found")
